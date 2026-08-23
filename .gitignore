@@ -1,0 +1,32 @@
+# VoiceGuard AI Backend — .gitignore
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+dist/
+build/
+
+# Environment
+.env
+.env.*
+!.env.example
+
+# Runtime directories (generated, not committed)
+tmp_audio/
+pdfs/
+enrolled_voices/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+# Logs
+*.log

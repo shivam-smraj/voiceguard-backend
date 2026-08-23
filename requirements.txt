@@ -1,0 +1,34 @@
+# VoiceGuard AI Backend — Requirements
+# Python 3.10+ required
+#
+# Uses CPU-only PyTorch to keep Docker image lean (~1.5 GB smaller than CUDA build).
+# For GPU deployment, remove --extra-index-url and use torch>=2.3.0 instead.
+
+# ── Core Framework ────────────────────────────────
+fastapi>=0.110.0
+uvicorn>=0.27.0
+pydantic>=2.5.0
+pydantic-settings>=2.1.0
+python-dotenv>=1.0.0
+python-multipart>=0.0.6
+
+# ── ML / Audio (CPU-only) ─────────────────────────
+--extra-index-url https://download.pytorch.org/whl/cpu
+torch==2.3.0+cpu
+torchaudio==2.3.0+cpu
+numpy>=1.24.0
+scipy>=1.10.0
+librosa>=0.10.0
+soundfile>=0.12.0
+onnxruntime>=1.15.0
+
+# ── Visualization ─────────────────────────────────
+matplotlib>=3.7.0
+Pillow>=9.0.0
+
+# ── PDF Generation ───────────────────────────────
+reportlab>=4.0.0
+
+# ── Utilities ─────────────────────────────────────
+httpx>=0.25.0
+aiofiles>=23.0.0
