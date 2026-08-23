@@ -41,24 +41,32 @@ async def lifespan(app: FastAPI):
     Startup: Load all detection models into memory.
     Shutdown: Clean up resources.
     """
+    # Log env early so Railway/HF logs show port binding
+    port = os.environ.get("PORT", str(settings.PORT))
     logger.info("=" * 60)
     logger.info(f"  {settings.APP_NAME} v{settings.VERSION}")
     logger.info(f"  Environment: {settings.ENVIRONMENT}")
+    logger.info(f"  Port: {port}  (from $PORT env var)")
+    logger.info(f"  Models dir: {settings.MODELS_DIR}")
+    logger.info(f"  Python: {sys.version}")
     logger.info("=" * 60)
 
-    # Load models
-    logger.info("Loading detection models...")
-    registry.load_all()
-
-    active = registry.get_active_models()
-    logger.info(f"Models loaded: {len(active)} active")
-    for m in active:
-        logger.info(f"  - {m.name} | EER={m.eer}%% | weight={m.weight:.3f}")
+    # Load models — wrapped in try/except so a model load failure
+    # doesn't crash the entire app; it starts in degraded mode instead.
+    try:
+        logger.info("Loading detection models...")
+        registry.load_all()
+        active = registry.get_active_models()
+        logger.info(f"Models loaded: {len(active)} active")
+        for m in active:
+            logger.info(f"  - {m.name} | EER={m.eer}%% | weight={m.weight:.3f}")
+    except Exception as exc:
+        logger.error(f"Model loading FAILED (degraded mode): {exc}", exc_info=True)
+        logger.warning("App will start but analysis endpoints will return errors until models are available.")
 
     logger.info(f"Audio config: SR={settings.SR}, chunk={settings.CHUNK_SEC}s, max={settings.MAX_AUDIO_DURATION_S}s")
-    logger.info(f"Sliding window: {settings.CHUNK_SEC}s chunks, {settings.CHUNK_OVERLAP_SEC}s overlap")
-    logger.info(f"WebSocket live analysis: ws://{settings.HOST}:{settings.PORT}/ws/live")
-    logger.info(f"Serving on {settings.HOST}:{settings.PORT}")
+    logger.info(f"Serving on 0.0.0.0:{port}")
+    logger.info("Startup complete — accepting requests")
     logger.info("=" * 60)
 
     yield  # App runs here
